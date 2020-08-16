@@ -151,12 +151,12 @@ struct PapancaZoneHTMLFactory<Site: Website>: HTMLFactory {
 // MARK: Helpers
 
 extension PapancaZoneHTMLFactory {
-    private func html<Site: Website>(
+    private func html(
         for location: Location,
         context: PublishingContext<Site>,
         selectedSection: Site.SectionID?,
         content: BodyContent,
-        bodyClass: HTML.Class? = nil)
+        bodyClass: HTMLClass? = nil)
     -> HTML {
         HTML(
             .lang(context.site.language),
@@ -178,7 +178,7 @@ extension Node where Context == HTML.DocumentContext {
         for context: PublishingContext<Site>,
         selectedSection: Site.SectionID?,
         content: BodyContent,
-        bodyClass: HTML.Class? = nil)
+        bodyClass: HTMLClass? = nil)
     -> Node {
         .body(header: .header(for: context, selectedSection: selectedSection),
               content: content,
@@ -190,7 +190,7 @@ extension Node where Context == HTML.DocumentContext {
         header: BodyContent.Element,
         content: BodyContent,
         footer: BodyContent.Element,
-        bodyClass: HTML.Class? = nil)
+        bodyClass: HTMLClass? = nil)
     -> Node {
         body(
             .unwrap(bodyClass) { .class($0) },
@@ -216,7 +216,9 @@ extension Node where Context == HTML.BodyContext {
 
         return .header(
             .wrapper(
-                .a(.class(.siteName), .href("/"), .text(context.site.name)),
+                .a(.class(.siteName),
+                   .href("/"),
+                   .text(context.site.name)),
                 .if(sectionIDs.count > 1,
                     .nav(
                         .ul(.forEach(sectionIDs) { section in
@@ -232,8 +234,11 @@ extension Node where Context == HTML.BodyContext {
         )
     }
 
-    static func itemList<T: Website>(for items: [Item<T>], on site: T) -> Node {
-        return .ul(
+    static func itemList<Site: Website>(
+        for items: [Item<Site>],
+        on site: Site
+    ) -> Node {
+        .ul(
             .class(.itemList),
             .forEach(items) { item in
                 .li(.article(
@@ -248,7 +253,7 @@ extension Node where Context == HTML.BodyContext {
         )
     }
 
-    static func tagList<T: Website>(for item: Item<T>, on site: T) -> Node {
+    static func tagList<Site: Website>(for item: Item<Site>, on site: Site) -> Node {
         return .ul(.class(.tagList), .forEach(item.tags) { tag in
             .li(.a(
                 .href(site.path(for: tag)),

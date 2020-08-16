@@ -9,37 +9,30 @@ import Foundation
 import Plot
 
 
-protocol HTMLClass: RawRepresentable, ExpressibleByStringLiteral where
-    RawValue == String,
-    StringLiteralType == String
-{}
+indirect enum HTMLClass {
+    case siteName
+    case content
+    case wrapper
+    case description
+    case itemPage
+    case selected
 
+    case tag
+    case tagList
+    case allTags
 
-extension HTML {
-    indirect enum Class: HTMLClass {
-        case siteName
-        case content
-        case wrapper
-        case description
-        case itemPage
-        case selected
+    case browseAll
+    case itemList
 
-        case tag
-        case tagList
-        case allTags
-
-        case browseAll
-        case itemList
-
-        case other(String)
-        case multiple([Self])
-        case empty
-    }
+    case other(String)
+    case multiple(Set<HTMLClass>)
+    case empty
 }
+
 
 // MARK: - RawRepresentable
 
-extension HTML.Class: RawRepresentable {
+extension HTMLClass: RawRepresentable {
     var rawValue: String {
         switch self {
         case .content: return "content"
@@ -66,7 +59,7 @@ extension HTML.Class: RawRepresentable {
             return ""
         }
     }
-    
+
     init(rawValue: String) {
         switch rawValue {
         case "wrapper":
@@ -89,20 +82,32 @@ extension HTML.Class: RawRepresentable {
     }
 }
 
+// MARK: - Protocol Conformance
 
-// MARK: - String Literal
-
-extension HTML.Class: ExpressibleByStringLiteral {
+extension HTMLClass: ExpressibleByStringLiteral {
     init(stringLiteral value: String) {
         self.init(rawValue: value)
     }
 }
 
+extension HTMLClass: Equatable {
+    static func ==(lhs: HTMLClass, rhs: HTMLClass) -> Bool {
+        if case .multiple(let lhsClasses) = lhs,
+           case .multiple(let rhsClasses) = rhs
+        {
+            return lhsClasses == rhsClasses
+        }
+        return lhs.rawValue == rhs.rawValue
+    }
+}
+
+extension HTMLClass: Hashable {}
+
 
 // MARK: - Node
 
 extension Node where Context: HTMLContext {
-    static func `class`(_ htmlClass: HTML.Class) -> Node {
+    static func `class`(_ htmlClass: HTMLClass) -> Node {
         .class(htmlClass.rawValue)
     }
 }

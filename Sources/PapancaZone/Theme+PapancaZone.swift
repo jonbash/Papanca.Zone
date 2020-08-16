@@ -8,11 +8,15 @@
 import Publish
 import Plot
 
+
+typealias BodyContent = [Node<HTML.BodyContext>]
+
+
 extension Theme {
     static var papancaZone: Self {
         Theme(
             htmlFactory: PapancaZoneHTMLFactory(),
-            resourcePaths: []
+            resourcePaths: ["Resources/PapancaZone/styles.css"]
         )
     }
 }
@@ -21,6 +25,14 @@ extension Theme {
 // MARK: - HTML Factory
 
 struct PapancaZoneHTMLFactory<Site: Website>: HTMLFactory {
+    typealias SectionGenerator = (Section<Site>) -> BodyContent?
+
+    private var sectionGenerator: SectionGenerator
+
+    init(sectionGenerator: @escaping SectionGenerator = { _ in nil }) {
+        self.sectionGenerator = sectionGenerator
+    }
+
     func makeIndexHTML(
         for index: Index,
         context: PublishingContext<Site>)
@@ -51,15 +63,7 @@ struct PapancaZoneHTMLFactory<Site: Website>: HTMLFactory {
             context: context,
             selectedSection: section.id,
             content: {
-                if let sectionID = section.id as? PapancaZone.SectionID,
-                   sectionID == .glossary
-                {
-                    return [
-                        // TODO: write accordion glossary
-                        .p(.text("Insert accordion glossary here"))
-                    ]
-                }
-                return [
+                sectionGenerator(section) ?? [
                     .h1(.text(section.title)),
                     .itemList(for: section.items, on: context.site)
                 ]
@@ -149,7 +153,7 @@ extension PapancaZoneHTMLFactory {
         for location: Location,
         context: PublishingContext<Site>,
         selectedSection: Site.SectionID?,
-        content: [Node<HTML.BodyContext>],
+        content: BodyContent,
         bodyClass: HTML.Class? = nil)
     -> HTML {
         HTML(
@@ -171,7 +175,7 @@ extension Node where Context == HTML.DocumentContext {
     static func standardBody<Site: Website>(
         for context: PublishingContext<Site>,
         selectedSection: Site.SectionID?,
-        content: [Node<HTML.BodyContext>],
+        content: BodyContent,
         bodyClass: HTML.Class? = nil)
     -> Node {
         .body(header: .header(for: context, selectedSection: selectedSection),
@@ -181,9 +185,9 @@ extension Node where Context == HTML.DocumentContext {
     }
 
     static func body(
-        header: Node<HTML.BodyContext>,
-        content: [Node<HTML.BodyContext>],
-        footer: Node<HTML.BodyContext>,
+        header: BodyContent.Element,
+        content: BodyContent,
+        footer: BodyContent.Element,
         bodyClass: HTML.Class? = nil)
     -> Node {
         body(
@@ -194,8 +198,8 @@ extension Node where Context == HTML.DocumentContext {
         )
     }
 
-    static func body(_ nodes: [Node<HTML.BodyContext>]) -> Node {
-        .element(named: "body", nodes: nodes)
+    static func body(_ content: BodyContent) -> Node {
+        .element(named: "body", nodes: content)
     }
 }
 
@@ -251,7 +255,7 @@ extension Node where Context == HTML.BodyContext {
         })
     }
 
-    private func footer() -> Node<HTML.BodyContext> {
+    private func footer() -> BodyContent.Element {
         .footer(
             .p(
                 .text("Made with love by Jon Bash using Swift & "),

@@ -20,7 +20,31 @@ struct PapancaZone: Website {
     var description = "A proliferation of meditation and Dharma stuff"
     var language: Language { .english }
     var imagePath: Path? { nil }
+
+    static var footer: BodyContent.Element {
+        .footer(
+            .p(
+                .text("Made with love by Jon Bash using Swift & "),
+                .a(
+                    .text("Publish"),
+                    .href("https://github.com/johnsundell/publish")
+                )
+            ),
+            .p(.a(
+                .text("RSS feed"),
+                .href("/feed.rss")
+                ))
+        )
+    }
 }
 
 // This will generate your website using the theme:
-try PapancaZone().publish(withTheme: .papancaZone)
+try PapancaZone().publish(withTheme: .papancaZone(
+    sectionGenerator: { section -> BodyContent? in
+        switch section.id {
+        case .essays:
+            return nil
+        case .glossary:
+            return glossaryContent()
+        }
+}))

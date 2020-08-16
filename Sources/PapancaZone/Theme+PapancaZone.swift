@@ -13,9 +13,11 @@ typealias BodyContent = [Node<HTML.BodyContext>]
 
 
 extension Theme {
-    static var papancaZone: Self {
+    static func papancaZone(
+        sectionGenerator: @escaping PapancaZoneHTMLFactory<Site>.SectionGenerator = { _ in nil }
+    ) -> Self {
         Theme(
-            htmlFactory: PapancaZoneHTMLFactory(),
+            htmlFactory: PapancaZoneHTMLFactory(sectionGenerator: sectionGenerator),
             resourcePaths: ["Resources/PapancaZone/styles.css"]
         )
     }
@@ -180,7 +182,7 @@ extension Node where Context == HTML.DocumentContext {
     -> Node {
         .body(header: .header(for: context, selectedSection: selectedSection),
               content: content,
-              footer: .footer(),
+              footer: PapancaZone.footer,
               bodyClass: bodyClass)
     }
 
@@ -253,22 +255,6 @@ extension Node where Context == HTML.BodyContext {
                 .text(tag.string)
             ))
         })
-    }
-
-    private func footer() -> BodyContent.Element {
-        .footer(
-            .p(
-                .text("Made with love by Jon Bash using Swift & "),
-                .a(
-                    .text("Publish"),
-                    .href("https://github.com/johnsundell/publish")
-                )
-            ),
-            .p(.a(
-                .text("RSS feed"),
-                .href("/feed.rss")
-            ))
-        )
     }
 
     static func wrapper(_ nodes: [Node]) -> Node {

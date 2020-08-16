@@ -4,6 +4,7 @@ import PackageDescription
 
 let package = Package(
     name: "PapancaZone",
+    platforms: [.macOS(.v10_15)],
     products: [
         .executable(
             name: "PapancaZone",

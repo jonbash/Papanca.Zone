@@ -6,7 +6,7 @@ import Plot
 struct PapancaZone: Website {
     enum SectionID: String, WebsiteSectionID {
         // Add the sections that you want your website to contain here:
-        case posts
+        case essays
         case glossary
     }
 
@@ -22,5 +22,5 @@ struct PapancaZone: Website {
     var imagePath: Path? { nil }
 }
 
-// This will generate your website using the built-in Foundation theme:
-try PapancaZone().publish(withTheme: .foundation)
+// This will generate your website using the theme:
+try PapancaZone().publish(withTheme: .papancaZone)
